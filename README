@@ -1,0 +1,12 @@
+Funcios - Nagios plugin suite utilizing func
+
+Whenever I get around to it, Funcios will provide methods to
+do rudimentary checks of Linux hosts through Func. This should
+mean that no plugins are needed on remote hosts and the func
+modules are used to fetch information.
+
+	https://github.com/tomas-edwardsson/funcios
+
+- Nagios, http://nagios.org/
+- Func, https://fedorahosted.org/func/
+- Pynag, http://code.google.com/p/pynag/
