@@ -174,9 +174,48 @@ def main():
 			if mp_threshold_type == 'percentage':
 				np.add_perfdata("%s percentage" % mp, du[hostn][mp]['percentage'], '%', mp_warn.replace('%', ''), mp_crit.replace('%', ''), '0', '100')
 				np.add_perfdata("%s blocks" % mp, du[hostn][mp]['used'], 'K', 0, 0, '0', du[hostn][mp]['total'])
+
+				# Thresholds
+				if du[hostn][mp]['percentage'] > int(mp_crit.replace('%', '')):
+					np.add_message(CRITICAL, "%s Critical, Used %s/%s%%, Free %s/%s%%" % (
+						mp, 
+						hr_used, 
+						du[hostn][mp]['percentage'], 
+						hr_free, 
+						(100 - du[hostn][mp]['percentage'])))
+					continue
+				elif du[hostn][mp]['percentage'] > int(mp_warn.replace('%', '')):
+					np.add_message(WARNING, "%s Warning, Used %s/%s%%, Free %s/%s%%" % (
+						mp,
+						hr_used,
+						du[hostn][mp]['percentage'],
+						hr_free, 
+						(100 - du[hostn][mp]['percentage'])))
+					continue
 			else:
 				np.add_perfdata("%s percentage" % mp, du[hostn][mp]['percentage'], '%', 0, 0, '0', '100')
 				np.add_perfdata("%s blocks" % mp, du[hostn][mp]['used'], 'K', mp_warn, mp_crit, '0', du[hostn][mp]['total'])
+
+				mp_crit = int(mp_crit) * 1024
+				mp_warn = int(mp_warn) * 1024
+
+				# Thresholds
+				if int(du[hostn][mp]['available']) < mp_crit:
+					np.add_message(CRITICAL, "%s Critical, Used %s/%s%%, Free %s/%s%%" % (
+						mp, 
+						hr_used, 
+						du[hostn][mp]['percentage'], 
+						hr_free, 
+						(100 - du[hostn][mp]['percentage'])))
+					continue
+				elif int(du[hostn][mp]['available']) < mp_warn:
+					np.add_message(WARNING, "%s Warning, Used %s/%s%%, Free %s/%s%%" % (
+						mp,
+						hr_used,
+						du[hostn][mp]['percentage'],
+						hr_free, 
+						(100 - du[hostn][mp]['percentage'])))
+					continue
 
 			np.add_message(OK, "%s Used %s/%s%%, Free %s/%s%%" % (mp, hr_used, du[hostn][mp]['percentage'], hr_free, (100 - du[hostn][mp]['percentage'])))
 
