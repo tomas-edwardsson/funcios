@@ -1,0 +1,173 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+# Copyright 2011, Tomas Edwardsson <tommi@tommi.org>
+#
+# funcios is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# funcios is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Design goals
+#   handle checks for single hosts
+#   can check multiple hosts, sends passive for results --multiple (TODO)
+#   -w load1:load5:load15 -c load1:load5:load15
+#   if no thresholds are set, goes for cpu'num * 1.2:cpu'num * 1.5:cpu'num
+
+# Example:
+#    funcios-load -H host -w 10:12:18 -c 16:20:30
+
+# Nagios plugin extensions (http://code.google.com/p/pynag/)
+from pynag.Plugins import WARNING, CRITICAL, OK, UNKNOWN, simple as Plugin
+
+# Func client (https://fedorahosted.org/func/)
+import func.overlord.client as fc
+import func.CommonErrors
+import sys
+
+def process_load():
+	# Create the pynag.Plugin object
+	np = Plugin(must_threshold=False)
+
+	# Add command line arguments
+	np.add_arg("l", "list-minions", "Exclude a specific filesystem type", required=None, action="store_true")
+
+	# Plugin activation
+	np.activate()
+
+	# Set defaults for parameters
+	crit = np['critical'] or ''
+	warn = np['warning'] or ''
+	list_minions = np['list-minions'] or False
+
+	# Parse thresholds
+	if crit:
+		try:
+			parsed_crit = parse_load_threshold(crit)
+		except Exception, err:
+			np.nagios_exit(UNKNOWN, err)
+
+	if warn:
+		try:
+			parsed_warn = parse_load_threshold(warn)
+		except Exception, err:
+			np.nagios_exit(UNKNOWN, err)
+
+	# No hostname specified, we default to all
+	host = np['host'] or '*'
+
+	if list_minions == True:
+		print "List of minions"
+		for minion in fc.Client(host).list_minions():
+			print "	%s" % (minion)
+		sys.exit(0)
+
+	# Try to setup func client object
+	try:
+		client = fc.Client(host)
+	except func.CommonErrors.Func_Client_Exception, err:
+		np.nagios_exit(UNKNOWN, err)
+
+	if (crit == '' and warn) or (crit and warn == ''):
+		np.nagios_exit(UNKNOWN, "Cannot specific warning and no critical or vica-versa")
+
+	try:
+		processor_info = client.process.loadavg()
+	except Exception, err:
+		np.nagios_exit(UNKNOWN, "Unable to run funcios agent on client: %s" % (err))
+
+	# TODO support multiple hosts
+	if len(processor_info.keys()) > 1:
+		np.nagios_exit(UNKNOWN, "Multiple hosts not supported yet!")
+
+	done = False
+	# Roll through the result dict
+	for hostn in processor_info:
+		if crit == '' or warn == '':
+			# Run hwinfo for number of CPUs for automatic thresholds
+			try:
+				hwinfo = fc.Client(hostn).hardware.info()
+			except Exception, err:
+				np.nagios_exit(UNKNOWN, "Unable to run funcios agent on client: %s" % (err))
+			#   if no thresholds are set, goes for cpu'num * 1.2:cpu'num * 1.5:cpu'num
+			num_cpus = float(hwinfo[hostn]['numCpus']);
+			parsed_warn = [num_cpus * 2.0, num_cpus * 1.6, num_cpus * 1.2]
+			parsed_crit = [num_cpus * 2.4, num_cpus * 2.0,	num_cpus * 1.6]
+
+		# Save performance data
+		np.add_perfdata("load1min", processor_info[hostn][0], '', parsed_warn[0], parsed_crit[0], '0', '')
+		np.add_perfdata("load5min", processor_info[hostn][1], '', parsed_warn[1], parsed_crit[1], '0', '')
+		np.add_perfdata("load15min", processor_info[hostn][2], '', parsed_warn[2], parsed_crit[2], '0', '')
+
+		# Little trick to break nested loops
+		done = False
+
+		# Go through critical thresholds and compare to current
+		for i in range(3):
+			if float(processor_info[hostn][i]) > parsed_crit[i]:
+				#print "%i: %i - %i" % (i, processor_info[hostn][i], parsed_crit[i])
+				done = True
+				np.add_message(CRITICAL, "load too high, %.2f, %.2f, %.2f" % (
+					float(processor_info[hostn][0]), 
+					float(processor_info[hostn][1]), 
+					float(processor_info[hostn][2])))
+				break
+		if done == True: break
+
+		# Go through warning thresholds and compare to current
+		for i in range(3):
+			if float(processor_info[hostn][i]) > parsed_warn[i]:
+				done = True
+				np.add_message(WARNING, "load too high, %.2f, %.2f, %.2f" % (
+					float(processor_info[hostn][0]), 
+					float(processor_info[hostn][1]), 
+					float(processor_info[hostn][2])))
+				break
+		if done == True: break
+
+		#np.add_message(CRITICAL, "A")
+		np.add_message(OK, "load %.2f, %.2f, %.2f" % (float(processor_info[hostn][0]), float(processor_info[hostn][1]), float(processor_info[hostn][2])))
+
+	(code, message) = np.check_messages(joinallstr = "\n")
+
+	# Check if any messages were processed
+	if message == "":
+		np.nagios_exit(UNKNOWN, "No filesystems found using parameters given")
+
+	# Exit with the relevant code
+	np.nagios_exit( code, message )
+
+def parse_load_threshold(threshold):
+	load = threshold.split(':')
+
+	if (len(load) != 3):
+		raise Exception("Invalid threshold %s, eg 5:10:14" % (threshold))
+
+	for t in load:
+		if isFloat(t) == False:
+			raise Exception("Invalid threshold %s, eg 5:10:14" % (threshold))
+
+	return [float(load[0]), float(load[1]), float(load[2])]
+
+def isFloat(s):
+	is_float = True
+	try:
+		float(s)
+	except:
+		is_float = False
+	return is_float
+
+if __name__ == '__main__':
+    process_load()
+
+
+
+# vi: ts=4 :
