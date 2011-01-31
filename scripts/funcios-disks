@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 
 # Copyright 2011, Tomas Edwardsson <tommi@tommi.org>
 #
@@ -19,12 +20,12 @@
 # Design goals
 #   handle multiple disks with optional variant levels
 #   handle checks for single hosts
-#   can check multiple hosts, but not for use within nagios, only running from cmd line
+#   can check multiple hosts, sends passive for results --multiple
 #   -w and -c set defaults, but thresholds can be defined per disk
 #   -x exclude mountpoint
-#   -X exclude devce
-#   -F exclude filesystem type
-#   -f include filesystem types
+#   -X exclude filesystem type
+#   -d mountpoint:warn:crit set specific threshold for specified mountpoint
+#   -D mountpoint:warn:crit only check these mountpoints with specified warn/crit
 
 
 # Example:
@@ -34,84 +35,201 @@
 # /boot warn at 20MB crit at 5MB
 # Everything else warn at 100MB crit at 10MB
 
+fstypes_ignore = ['tmpfs', 'iso9660']
+mountpoints_ignore = []
 
-# Nagios plugin extensions
+# Nagios plugin extensions (http://code.google.com/p/pynag/)
 from pynag.Plugins import WARNING, CRITICAL, OK, UNKNOWN, simple as Plugin
 
-# Func client
+# Func client (https://fedorahosted.org/func/)
 import func.overlord.client as fc
 import func.CommonErrors
 
-# Create the pynag.Plugin object
-np = Plugin()
+def main():
+	# Create the pynag.Plugin object
+	np = Plugin(must_threshold=False)
 
-## Add command line arguments
-# Device file
-np.add_arg("d", "device-file", "Path to device to monitor", required=None)
-
-# Filesystem path
-np.add_arg("m", "mountpoint", "Path to mountpoint", required=None)
-
-# Filesystem path
-np.add_arg("L", "list-hosts", "List hosts", required=None)
-
-# Filesystem path
-np.add_arg("l", "list-disks", "List disks", required=None)
-
-# Hosts (bah, I want this but it's built into pynag)
-#np.add_arg("H", "hostname", "Hostname to check (wildcards allowed)", required=None)
-
-# Plugin activation
-np.activate()
+	## Add command line arguments
+	# Device file
+	np.add_arg("d", "disk-spec", "Path to device/mountpoint to monitor, including warn and critial, eg /:90%:95%", required=None, multiple=True)
+	np.add_arg("D", "disk-spec-exclusive", "Path to device/mountpoint to monitor, including warn and critial, eg /:90%:95%, no other disks than specified will be checked", required=None, multiple=True)
+	np.add_arg("x", "exclude-mountpoint", "Exclude a specific mountpoint", required=None, multiple=True)
+	np.add_arg("X", "exclude-fstype", "Exclude a specific filesystem type", required=None, multiple=True)
 
 
-#TODO WRITE conditions with thresholds and whatever...
-
-# Set defaults
-#crit = np['critical'] or '0'
-crit = np['critical'] or '0'
-warn = np['warning'] or '0'
-
-threshold_type = 'mb'
-
-if crit[:-1] == '%':
-	threshold_type = 'percentage'
-
-if warn[:-1] == '%' and threshold_type == 'percentage':
-	nagios_exit("UNKNOWN", "Cannot mix percentage and MB for warning and critical")
+	# Plugin activation
+	np.activate()
 
 
+	# Set defaults for parameters
+	crit = np['critical'] or '0'
+	warn = np['warning'] or '0'
+	disk_spec = np['disk-spec'] or []
+	disk_spec_exclusive = np['disk-spec-exclusive'] or []
+	exclude_fstype = np['exclude-fstype'] or []
+	exclude_mountpoint = np['exclude-mountpoint'] or []
+
+	# We got some mountpoint exclusions
+	for mountpoint in exclude_mountpoint:
+		mountpoints_ignore.append(mountpoint)
+
+	# We got some filesystem exclusions, add them to the list
+	for fstype in exclude_fstype:
+		fstypes_ignore.append(fstype)
+
+	# Both disk_spec and disk_spec_exclusive cannot live together
+	if len(disk_spec) and len(disk_spec_exclusive):
+		np.nagios_exit(UNKNOWN, "Cannot join -d/--disk-spec and -D/--disk-spec-exclusive arguments")
+
+	# Create parsed_disk_spec arguments
+	parsed_disk_spec = []
+	for diskspec in disk_spec:
+		try:
+			ds = parse_diskspec(diskspec)
+		except Exception as err:
+			np.nagios_exit(UNKNOWN, err)
+		parsed_disk_spec.append(ds)
+
+	# Create parsed_disk_spec_exclusive arguments
+	parsed_disk_spec_exclusive = []
+	for diskspec in disk_spec_exclusive:
+		try:
+			ds = parse_diskspec(diskspec)
+		except Exception as err:
+			np.nagios_exit(UNKNOWN, err)
+		parsed_disk_spec_exclusive.append(ds)
+
+	# Default we use blocks
+	threshold_type = 'kb'
+
+	if crit[-1] == '%':
+		threshold_type = 'percentage'
+
+	if warn[-1] == '%' and threshold_type != 'percentage':
+		np.nagios_exit(UNKNOWN, "Cannot mix percentage and KB for warning and critical")
 
 
+	# Probably not needed, removing when I'm older
+	all_minions = fc.Client('*').list_minions()
+	
+	# No hostname specified, we default to all
+	host = np['host'] or '*'
 
-# Probably not needed, removing when I'm older
-all_minions = fc.Client('*').list_minions()
+	# Try to setup func client object
+	try:
+		client = fc.Client(host)
+	except func.CommonErrors.Func_Client_Exception as err:
+		np.nagios_exit(UNKNOWN, err)
 
-# No hostname specified, we default to all
-host = np['host'] or '*'
+	# Run disk usage
+	try:
+		du = client.disk.usage()
+	except:
+		nagios_exit(UNKNOWN, "Unable to run funcios agent on client")
 
-# Try to setup func client object
-try:
-	client = fc.Client(host)
-except func.CommonErrors.Func_Client_Exception as err:
-	np.nagios_exit("UNKNOWN", err)
+	# Roll through the result dict
+	for hostn in du:
+		# Mountpoints
+		for mp in du[hostn]:
+			# Ignore certain filesystem types
+			if du[hostn][mp]['fstype'] in fstypes_ignore:
+				continue
 
-# Run disk usage
-try:
-	du = client.disk.usage()
-except:
-	pass
+			# Ignore mountpoints
+			if mp in mountpoints_ignore:
+				continue
 
-# Set the default return code
-return_code = 0
+			# Set thresholds
+			mp_warn = warn
+			mp_crit = crit
+			mp_threshold_type = threshold_type
 
-for hostn in du:
-	for mp in du[hostn]:
-		np.add_perfdata(mp, du[hostn][mp]['percentage'], '%', warn.replace('%', ''), crit.replace('%', ''), '0', '100')
+			# disk_spec_exclusive set, check if current mp is defined
+			if len(parsed_disk_spec_exclusive):
+				found = 0
+				for dse in parsed_disk_spec_exclusive:
+					if dse['mountpoint'] == mp:
+						found = 1
+						mp_warn = dse['warn']
+						mp_crit = dse['crit']
+						mp_threshold_type = dse['type']
+						break
+				if not found: continue
 
-np.add_message(UNKNOWN, "ze unknown")
-np.add_message("UNKNOWN", "ze warn")
-(code, message) = np.check_messages(joinallstr = " ")
-np.nagios_exit( code, message )
+			# disk_spec_exclusive set, search for thresholds
+			if len(parsed_disk_spec):
+				for dse in parsed_disk_spec:
+					if dse['mountpoint'] == mp:
+						found = 1
+						mp_warn = dse['warn']
+						mp_crit = dse['crit']
+						mp_threshold_type = dse['type']
+						break
+
+
+			# Get the human readable strings for disk sizes
+			hr_used = human_readable_size(float(du[hostn][mp]['used']))
+			hr_free = human_readable_size(float(du[hostn][mp]['total']) - float(du[hostn][mp]['used']))
+
+			if mp_threshold_type == 'percentage':
+				np.add_perfdata("%s percentage" % mp, du[hostn][mp]['percentage'], '%', mp_warn.replace('%', ''), mp_crit.replace('%', ''), '0', '100')
+				np.add_perfdata("%s blocks" % mp, du[hostn][mp]['used'], 'K', 0, 0, '0', du[hostn][mp]['total'])
+			else:
+				np.add_perfdata("%s percentage" % mp, du[hostn][mp]['percentage'], '%', 0, 0, '0', '100')
+				np.add_perfdata("%s blocks" % mp, du[hostn][mp]['used'], 'K', mp_warn, mp_crit, '0', du[hostn][mp]['total'])
+
+			np.add_message(OK, "%s Used %s/%s%%, Free %s/%s%%" % (mp, hr_used, du[hostn][mp]['percentage'], hr_free, (100 - du[hostn][mp]['percentage'])))
+
+	(code, message) = np.check_messages(joinallstr = "\n")
+
+	# Check if any messages were processed
+	if message == "":
+		np.nagios_exit(UNKNOWN, "No filesystems found using parameters given")
+
+	# Exit with the relevant code
+	np.nagios_exit( code, message )
+
+def human_readable_size (size = -1):
+	"""
+	Converts bytes to human readable sizes, eg MB, GB, TB.
+	"""
+	sizes = ['KB', 'MB', 'GB', 'TB', 'PB']
+
+	for i in range(len(sizes)):
+		if size < 1024**(i+1):
+			break
+	return "%.2f%s" % ((size / 1024**(i)), sizes[i])
+
+
+def parse_diskspec(diskspec):
+	(mp, mp_warn, mp_crit) = diskspec.split(':')
+	"""
+	Parses command line arguemnts for disks, eg "/:90%:95%"
+	"""
+
+	if mp_warn[-1] == '%':
+		type = 'percentage'
+		mp_warn = mp_warn[:-1]
+	else:
+		type = 'kb'
+	if mp_crit[-1] == '%':
+		if type == 'kb':
+			raise Exception("Argument problem, percentage and kilobytes not allowed together, -d %s" % (diskspec))
+		mp_crit = mp_crit[:-1]
+	elif type == 'percentage':
+		raise Exception("Argument problem, percentage and kilobytes not allowed together, -d %s" % (diskspec))
+
+	if mp_warn.isdigit() == False:
+		raise Exception("Argument warning not numeric, %s in -d %s" % (mp_warn, diskspec))
+	if mp_crit.isdigit() == False:
+		raise Exception("Argument critical not numeric, %s in -d %s" % (mp_crit, diskspec))
+
+	ds = { 'mountpoint': mp, 'warn': mp_warn, 'crit': mp_crit, 'type': type }
+	return ds
+	
+
+if __name__ == '__main__':
+    main()
+
 
 # vi: ts=4 :
