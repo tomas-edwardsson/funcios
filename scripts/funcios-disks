@@ -86,7 +86,7 @@ def main():
 	for diskspec in disk_spec:
 		try:
 			ds = parse_diskspec(diskspec)
-		except Exception as err:
+		except Exception, err:
 			np.nagios_exit(UNKNOWN, err)
 		parsed_disk_spec.append(ds)
 
@@ -95,7 +95,7 @@ def main():
 	for diskspec in disk_spec_exclusive:
 		try:
 			ds = parse_diskspec(diskspec)
-		except Exception as err:
+		except Exception, err:
 			np.nagios_exit(UNKNOWN, err)
 		parsed_disk_spec_exclusive.append(ds)
 
@@ -120,7 +120,7 @@ def main():
 	# Try to setup func client object
 	try:
 		client = fc.Client(host)
-	except func.CommonErrors.Func_Client_Exception as err:
+	except func.CommonErrors.Func_Client_Exception, err:
 		np.nagios_exit(UNKNOWN, err)
 
 	# Run disk usage
