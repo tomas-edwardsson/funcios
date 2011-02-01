@@ -1,0 +1,101 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+# Copyright 2011, Tomas Edwardsson <tommi@tommi.org>
+#
+# funcios is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# funcios is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Example:
+#    funcios-time -H host -w 10 -c 20
+
+# Nagios plugin extensions (http://code.google.com/p/pynag/)
+from pynag.Plugins import WARNING, CRITICAL, OK, UNKNOWN, simple as Plugin
+
+# Func client (https://fedorahosted.org/func/)
+import func.overlord.client as fc
+import func.CommonErrors
+import timemodule
+
+def process_time():
+	# Create the pynag.Plugin object
+	np = Plugin(must_threshold=False)
+
+	# Add command line arguments
+	np.add_arg("l", "list-minions", "Exclude a specific filesystem type", required=None, action="store_true")
+
+	# Plugin activation
+	np.activate()
+
+	# Set defaults for parameters
+	crit = np['critical'] or '60'
+	warn = np['warning'] or '5'
+	list_minions = np['list-minions'] or False
+
+	# No hostname specified, we default to all
+	host = np['host'] or '*'
+
+	if list_minions == True:
+		print "List of minions"
+		for minion in fc.Client(host).list_minions():
+			print "	%s" % (minion)
+		sys.exit(0)
+
+	# Try to setup func client object
+	try:
+		client = fc.Client(host)
+	except func.CommonErrors.Func_Client_Exception, err:
+		np.nagios_exit(UNKNOWN, err)
+
+	local_time = timemodule.time()
+	try:
+		time_info = client.time.epoch()
+	except Exception, err:
+		np.nagios_exit(UNKNOWN, "Unable to run funcios agent on client: %s" % (err))
+
+	# TODO support multiple hosts
+	if len(time_info.keys()) > 1:
+		np.nagios_exit(UNKNOWN, "Multiple hosts not supported yet!")
+
+	done = False
+	# Roll through the result dict
+	for hostn in time_info:
+		# Calculate offset
+		offset = local_time - time_info[hostn];
+
+		# Get positive representation
+		if offset < 0:
+			positive_offset = offset * -1
+
+		# Add offset performance data
+		np.add_perfdata("offset", "%.2f" % offset, '', warn, crit, '0', '')
+
+		# Compare to thresholds
+		if positive_offset > float(crit):
+			np.add_message(CRITICAL, "time offset too high, %.2f" % (offset))
+		elif positive_offset > float(warn):
+			np.add_message(WARNING, "time offset too high, %.2f" % (offset))
+		else:
+			np.add_message(OK, "time offset %.2f" % (offset))
+
+	(code, message) = np.check_messages(joinallstr = "\n")
+
+	# Exit with the relevant code
+	np.nagios_exit( code, message )
+
+if __name__ == '__main__':
+    process_time()
+
+
+
+# vi: ts=4 :
