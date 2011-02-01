@@ -57,11 +57,11 @@ def process_time():
 	except func.CommonErrors.Func_Client_Exception, err:
 		np.nagios_exit(UNKNOWN, err)
 
-	local_time = timemodule.time()
 	try:
 		time_info = client.time.epoch()
 	except Exception, err:
 		np.nagios_exit(UNKNOWN, "Unable to run funcios agent on client: %s" % (err))
+	local_time = timemodule.time()
 
 	# TODO support multiple hosts
 	if len(time_info.keys()) > 1:
@@ -74,6 +74,7 @@ def process_time():
 		offset = local_time - time_info[hostn];
 
 		# Get positive representation
+		positive_offset = 0
 		if offset < 0:
 			positive_offset = offset * -1
 
