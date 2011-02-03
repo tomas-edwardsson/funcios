@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="744.09448819"
+   height="1052.3622047"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.47 r22583"
+   sodipodi:docname="nagios-integration-drawing.png">
+  <defs
+     id="defs4">
+    <marker
+       inkscape:stockid="Arrow1Lstart"
+       orient="auto"
+       refY="0.0"
+       refX="0.0"
+       id="Arrow1Lstart"
+       style="overflow:visible">
+      <path
+         id="path3672"
+         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1.0pt;marker-start:none"
+         transform="scale(0.8) translate(12.5,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Lend"
+       orient="auto"
+       refY="0.0"
+       refX="0.0"
+       id="Arrow1Lend"
+       style="overflow:visible;">
+      <path
+         id="path3675"
+         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1.0pt;marker-start:none;"
+         transform="scale(0.8) rotate(180) translate(12.5,0)" />
+    </marker>
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 526.18109 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="744.09448 : 526.18109 : 1"
+       inkscape:persp3d-origin="372.04724 : 350.78739 : 1"
+       id="perspective10" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1"
+     inkscape:cx="404.92333"
+     inkscape:cy="806.46569"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1429"
+     inkscape:window-height="770"
+     inkscape:window-x="29"
+     inkscape:window-y="25"
+     inkscape:window-maximized="0" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="fill:#ffffff"
+       id="rect2818"
+       width="107"
+       height="84"
+       x="52"
+       y="47.362183" />
+    <g
+       id="g5099">
+      <rect
+         y="42.362183"
+         x="53"
+         height="55"
+         width="109"
+         id="rect2820"
+         style="fill:#e6e6e6" />
+      <text
+         id="text2822"
+         y="76.362183"
+         x="76"
+         style="font-size:18px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
+         xml:space="preserve"><tspan
+           y="76.362183"
+           x="76"
+           id="tspan2824"
+           sodipodi:role="line"
+           style="font-weight:bold">Nagios</tspan></text>
+    </g>
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot2828"
+       style="font-size:40px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"><flowRegion
+         id="flowRegion2830"><rect
+           id="rect2832"
+           width="114"
+           height="123"
+           x="97"
+           y="139.36218" /></flowRegion><flowPara
+         id="flowPara2834" /></flowRoot>    <g
+       id="g5090">
+      <rect
+         y="131.36218"
+         x="92"
+         height="82"
+         width="140"
+         id="rect2826"
+         style="fill:#e6e6e6" />
+      <flowRoot
+         style="font-size:16px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
+         id="flowRoot2836"
+         xml:space="preserve"><flowRegion
+           id="flowRegion2838"><rect
+             y="150.36218"
+             x="96"
+             height="121"
+             width="120"
+             id="rect2840" /></flowRegion><flowPara
+           id="flowPara2842"
+           style="font-weight:bold">Funcios</flowPara><flowPara
+           id="flowPara2844">  Load Runner</flowPara><flowPara
+           id="flowPara2850" /></flowRoot>    </g>
+    <rect
+       style="fill:#e6e6e6"
+       id="rect2852"
+       width="150"
+       height="80"
+       x="283"
+       y="133.36218" />
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot2854"
+       style="font-size:16px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"><flowRegion
+         id="flowRegion2856"><rect
+           id="rect2858"
+           width="137"
+           height="69"
+           x="288"
+           y="141.36218" /></flowRegion><flowPara
+         id="flowPara2860"
+         style="font-weight:bold">funcios-load</flowPara><flowPara
+         id="flowPara2862">  multiple</flowPara><flowPara
+         id="flowPara2864">  -H : sep or wild</flowPara></flowRoot>    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow1Lend)"
+       d="M 52,68.362183 C 19.50877,92.556766 14.504527,104.30906 19.134225,117.3144 30.195445,148.38661 93,161.36218 93,161.36218"
+       id="path2866"
+       sodipodi:nodetypes="csc" />
+    <rect
+       style="fill:#e6e6e6"
+       id="rect2868"
+       width="176"
+       height="85"
+       x="494"
+       y="133.36218" />
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot2870"
+       style="font-size:16px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"><flowRegion
+         id="flowRegion2872"><rect
+           id="rect2874"
+           width="166"
+           height="69"
+           x="498"
+           y="141.36218" /></flowRegion><flowPara
+         style="font-weight:bold"
+         id="flowPara2876">Passive results</flowPara><flowPara
+         id="flowPara5407"
+         style="font-weight:normal">  sent for each host</flowPara><flowPara
+         style="font-weight:normal"
+         id="flowPara5418">  to Nagios</flowPara></flowRoot>    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow1Lend)"
+       d="M 562,135.36218 C 495,39.362183 161,66.362183 161,66.362183"
+       id="path2878" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow1Lend)"
+       d="m 223,181.36218 c 26,-27 60,-33 60,-33"
+       id="path2880"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow1Lend)"
+       d="m 387,212.36218 c 24,2 50,40 50,40"
+       id="path2882"
+       sodipodi:nodetypes="cc" />
+    <rect
+       style="fill:#aaccff"
+       id="rect5051"
+       width="177"
+       height="106"
+       x="372"
+       y="247.36218" />
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot5053"
+       style="font-size:16px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
+       transform="translate(46,9)"><flowRegion
+         id="flowRegion5055"><rect
+           id="rect5057"
+           width="161"
+           height="117"
+           x="337"
+           y="248.36218" /></flowRegion><flowPara
+         id="flowPara5059"
+         style="font-weight:bold">Func</flowPara><flowPara
+         id="flowPara5061">  Run on minions</flowPara><flowPara
+         id="flowPara5063">  process.loadavg()</flowPara><flowPara
+         id="flowPara5303">  hardware.info()</flowPara><flowPara
+         id="flowPara5305" /><flowPara
+         id="flowPara5307" /></flowRoot>    <path
+       style="fill:none;stroke:#000000;stroke-width:1.02010691px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow1Lend)"
+       d="m 456.01001,248.35213 c -1.99891,-95.78882 36.97994,-96.83 36.97994,-96.83"
+       id="path5104" />
+  </g>
+</svg>
