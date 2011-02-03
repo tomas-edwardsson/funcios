@@ -1,0 +1,58 @@
+A few tricks to know what commands are available through Func
+
+List all methods available in Func
+	func <hostname> call system list_methods
+
+List available modules
+	func <hostname> call system list_modules
+
+List methods associated with a module
+	func <hostname> call <module> list_methods
+
+List valid arguments for func methods
+	func <hostname> call <module> get_method_args
+
+When you know what you want, you can call the function.
+	func <hostname> call <modules> <method> <methodargs>
+
+EXAMPLE, I want to know something about what I can do with disks
+
+	$ func tommilap call system list_modules|grep disk
+	              'disk',
+	$ func tommilap call disk list_methods
+	{'tommilap': ['usage',
+              	'config_items',
+              	'grep',
+              	'save_config',
+              	'module_version',
+              	'grep',
+              	'list_methods',
+              	'module_description',
+              	'get_method_args',
+              	'module_api_version']}
+	$ func tommilap call disk usage
+	{'tommilap': {'/': {'available': '20857704',
+                    	'device': '/dev/mapper/vg_tommilapv2-lv_root',
+                    	'fstype': 'ext4',
+                    	'percentage': 58,
+                    	'total': '51606140',
+                    	'used': '28126996'},
+              	'/boot': {'available': '403669',
+                        	'device': '/dev/sda1',
+                        	'fstype': 'ext4',
+                        	'percentage': 15,
+                        	'total': '495844',
+                        	'used': '66575'},
+              	'/dev/shm': {'available': '1987228',
+                           	'device': 'tmpfs',
+                           	'fstype': 'tmpfs',
+                           	'percentage': 1,
+                           	'total': '1988812',
+                           	'used': '1584'},
+              	'/home': {'available': '143382668',
+                        	'device': '/dev/mapper/vg_tommilapv2-lv_home',
+                        	'fstype': 'ext4',
+                        	'percentage': 40,
+                        	'total': '249612172',
+                        	'used': '93549928'}}}
+
