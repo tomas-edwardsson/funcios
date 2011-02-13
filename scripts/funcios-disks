@@ -54,7 +54,7 @@ def main():
 	np.add_arg("D", "disk-spec-exclusive", "Path to device/mountpoint to monitor, including warn and critial, eg /:90%:95%, no other disks than specified will be checked", required=None, action="append")
 	np.add_arg("x", "exclude-mountpoint", "Exclude a specific mountpoint", required=None, action="append")
 	np.add_arg("X", "exclude-fstype", "Exclude a specific filesystem type", required=None, action="append")
-	np.add_arg("l", "list-minions", "Exclude a specific filesystem type", required=None, action="store_true")
+	np.add_arg("l", "list-minions", "List func minions", required=None, action="store_true")
 
 	# Plugin activation
 	np.activate()
@@ -242,7 +242,7 @@ def human_readable_size (size = -1):
 	for i in range(len(sizes)):
 		if size < 1024**(i+1):
 			break
-	return "%.2f%s" % ((size / 1024**(i)), sizes[i])
+	return "%.2f%s" % ((float(size) / 1024**(i)), sizes[i])
 
 
 def parse_diskspec(diskspec):
