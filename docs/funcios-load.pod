@@ -1,0 +1,52 @@
+=head1 NAME
+
+funcios-load - check load average on func minions
+
+=head1 SYNOPSIS
+
+funcios-load [ -hl ] [ -H <host> ] [ -c c1:c5:c15 ] [ -w w1:w5:w15 ]
+
+=head1 DESCRIPTION
+
+funcios-load checks load average on func minions. Critical and warn thresholds
+are optional and will be set to a default based on the number of cpus in the
+minion checked.
+
+=head2 -H <hostname>
+
+The hostname to be checked.
+
+=head2 -c <1 min avg:5 min avg:15 min avg>
+
+Critical threshold
+
+=head2 -w <1 min avg:5 min avg:15 min avg>
+
+Warning threshold
+
+
+
+=head1 EXAMPLES
+
+
+Check with default thresholds
+
+	funcios-load -H host1.example.com 
+
+Check with specified thresholds
+
+	funcios-load -H host1.example.com -w 12:10:8 -c 18:14:10
+
+
+=head1 ADDITIONAL RESOURCES
+
+See http://opensource.is/trac/wiki/Funcios for more information.
+
+=head1 SEE ALSO
+
+Man pages for funcios-cpu(1) funcios-disks(1) funcios-file(1) funcios-load(1)
+funcios-procs(1) funcios-time(1)
+
+=head1 AUTHOR
+
+Tomas Edwardsson <tommi@tommi.org>

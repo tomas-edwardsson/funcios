@@ -1,0 +1,45 @@
+=head1 NAME
+
+funcios-disks - check disks on func minions
+
+=head1 SYNOPSIS
+
+funcios-disks [ -hl ] [ -H <host> ] [ -d D:W:C ] [ -D D:W:C ]
+[ -x <mountpoint> ] [ -X <fstype> ] [ -t <timeout> ] [ -c CRIT ]
+[ -w WARN ]
+
+=head1 DESCRIPTION
+
+funcios-disks checks disk space on func minions. Various methods can be used
+to set thresholds. Default it will check all disks with thresholds passed
+through -w and -c. Additionally you can set per disk thresholds with -d.
+
+=head2 -H <hostname>
+
+The hostname to be checked.
+
+=head2 -d <mountpoint:warn threshold:crit threshold>
+
+Sets specific warning and critical for the mountpoint specified. This will
+override whatever is specified with -w and -c.
+
+=head1 EXAMPLES
+
+
+Warn if disk utilization is over 80%, critical over 90%
+
+	funcios-disks -H host1.example.com -w 80% -c 95%
+
+
+=head1 ADDITIONAL RESOURCES
+
+See http://opensource.is/trac/wiki/Funcios for more information.
+
+=head1 SEE ALSO
+
+Man pages for funcios-cpu(1) funcios-disks(1) funcios-file(1) funcios-load(1)
+funcios-procs(1) funcios-time(1)
+
+=head1 AUTHOR
+
+Tomas Edwardsson <tommi@tommi.org>
